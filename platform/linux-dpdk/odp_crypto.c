@@ -270,9 +270,7 @@ int odp_crypto_init_global(void)
 		struct rte_cryptodev_info dev_info;
 
 		rte_cryptodev_info_get(cdev_id, &dev_info);
-		nb_queue_pairs = odp_cpu_count();
-		if (nb_queue_pairs > dev_info.max_nb_queue_pairs)
-			nb_queue_pairs = dev_info.max_nb_queue_pairs;
+		nb_queue_pairs = dev_info.max_nb_queue_pairs;
 
 		struct rte_cryptodev_qp_conf qp_conf;
 
