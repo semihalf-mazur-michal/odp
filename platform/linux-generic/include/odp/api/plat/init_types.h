@@ -26,6 +26,8 @@ typedef uint64_t odp_instance_t;
  */
 typedef struct odp_platform_init_t {
 	int ipc_ns; /**< Name space for ipc shared objects. */
+	int memory; /**< Amount of memory to allocate in MB */
+	char *cmdline; /**< Additional options passed as a string */
 } odp_platform_init_t;
 
 #ifdef __cplusplus
