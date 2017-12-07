@@ -102,6 +102,12 @@ static inline void *_odp_packet_user_area(odp_packet_t pkt)
 	return _odp_pkt_get(pkt, void *, user_area);
 }
 
+/** @internal Inline function @param uarea @return */
+static inline odp_packet_t _odp_packet_from_user_area(void *uarea ODP_UNUSED)
+{
+	return (odp_packet_t)(ODP_PACKET_INVALID);
+}
+
 /** @internal Inline function @param pkt @return */
 static inline uint32_t _odp_packet_user_area_size(odp_packet_t pkt)
 {
