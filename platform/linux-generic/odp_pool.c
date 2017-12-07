@@ -511,6 +511,10 @@ static odp_pool_t pool_create(const char *name, odp_pool_param_t *params,
 		pool->uarea_base_addr = odp_shm_addr(pool->uarea_shm);
 	}
 
+	params->pool_start = (uint64_t)pool->base_addr;
+	params->pool_end = (uint64_t)pool->base_addr + pool->shm_size;
+	params->pool_size = pool->shm_size;
+
 	ring_init(&pool->ring->hdr);
 	init_buffers(pool);
 
