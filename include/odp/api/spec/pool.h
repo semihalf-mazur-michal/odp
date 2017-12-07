@@ -194,6 +194,9 @@ typedef struct odp_pool_pkt_subparam_t {
 typedef struct odp_pool_param_t {
 	/** Pool type */
 	int type;
+	uint64_t pool_start;
+	uint64_t pool_end;
+	uint64_t pool_size;
 
 	/** Parameters for buffer pools */
 	struct {
