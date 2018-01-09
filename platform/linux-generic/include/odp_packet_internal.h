@@ -161,7 +161,7 @@ typedef struct {
 	/* Context for IPsec */
 	odp_ipsec_packet_result_t ipsec_ctx;
 
-	/* Packet data storage */
+	/* Packet data or user area */
 	uint8_t data[0];
 } odp_packet_hdr_t;
 
