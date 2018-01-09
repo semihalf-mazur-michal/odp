@@ -54,7 +54,6 @@ typedef struct pool_t {
 	uint32_t         pool_idx;
 	uint32_t         ring_mask;
 	odp_shm_t        shm;
-	odp_shm_t        uarea_shm;
 	int              reserved;
 	uint32_t         num;
 	uint32_t         align;
@@ -66,9 +65,7 @@ typedef struct pool_t {
 	uint32_t         uarea_size;
 	uint32_t         block_size;
 	uint32_t         shm_size;
-	uint32_t         uarea_shm_size;
 	uint8_t         *base_addr;
-	uint8_t         *uarea_base_addr;
 
 	/* Used by DPDK zero-copy pktio */
 	uint8_t		mem_from_huge_pages;
