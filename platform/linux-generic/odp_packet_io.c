@@ -263,7 +263,7 @@ odp_pktio_t odp_pktio_open(const char *name, odp_pool_t pool,
 
 static int _pktio_close(pktio_entry_t *entry)
 {
-	int ret;
+//	int ret;
 	int state = entry->s.state;
 
 	if (state != PKTIO_STATE_OPENED &&
@@ -271,9 +271,9 @@ static int _pktio_close(pktio_entry_t *entry)
 	    state != PKTIO_STATE_STOP_PENDING)
 		return -1;
 
-	ret = entry->s.ops->close(entry);
-	if (ret)
-		return -1;
+//	ret = entry->s.ops->close(entry);
+//	if (ret)
+//		return -1;
 
 	if (state == PKTIO_STATE_STOP_PENDING)
 		entry->s.state = PKTIO_STATE_CLOSE_PENDING;
