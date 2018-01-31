@@ -19,9 +19,11 @@
 
 #include <odp/api/packet.h>
 #include <odp/api/plat/packet_inlines.h>
+#include <odp/api/plat/packet_flag_inlines.h>
 
 #include <odp_packet_io_internal.h>
 #include <odp_classification_internal.h>
+#include <odp_ipsec_internal.h>
 #include <odp_packet_dpdk.h>
 #include <odp_debug_internal.h>
 
@@ -1289,6 +1291,9 @@ static void dpdk_init_capability(pktio_entry_t *pktio_entry,
 		capa->config.pktout.bit.udp_chksum;
 	capa->config.pktout.bit.tcp_chksum_ena =
 		capa->config.pktout.bit.tcp_chksum;
+
+	capa->config.inbound_ipsec = 1;
+	capa->config.outbound_ipsec = 1;
 }
 
 static int dpdk_open(odp_pktio_t id ODP_UNUSED,
@@ -1574,6 +1579,21 @@ static int dpdk_recv(pktio_entry_t *pktio_entry, int index,
 		else
 			nb_rx = mbuf_to_pkt(pktio_entry, pkt_table, rx_mbufs,
 					    nb_rx, ts);
+
+		/* Try IPsec inline processing */
+		for (i = 0; i < nb_rx; i++) {
+			odp_packet_t pkt = pkt_table[i];
+			odp_packet_hdr_t *pkt_hdr = packet_hdr(pkt);
+
+			packet_parse_layer(pkt_hdr, ODP_PROTO_LAYER_L4);
+
+			/* Try IPsec inline processing */
+			if (!pkt_hdr->p.error_flags.ip_err &&
+			    _odp_packet_has_ipsec(pkt))
+				_odp_ipsec_try_inline(&pkt_table[i]);
+
+		}
+
 	}
 
 	return nb_rx;
