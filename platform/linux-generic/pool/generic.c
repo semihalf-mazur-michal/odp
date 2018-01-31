@@ -642,6 +642,9 @@ static int generic_pool_info(odp_pool_t pool_hdl, odp_pool_info_t *info)
 	info->name = pool->name;
 	info->params = pool->params;
 
+	info->min_data_addr = (uint64_t) pool->base_addr;
+	info->max_data_addr = (uint64_t) pool->base_addr + pool->shm_size - 1;
+
 	return 0;
 }
 
