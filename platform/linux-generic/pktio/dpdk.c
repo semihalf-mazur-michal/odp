@@ -23,6 +23,7 @@
 
 #include <odp_packet_io_internal.h>
 #include <odp_classification_internal.h>
+#include <odp_ipsec_internal.h>
 #include <odp_debug_internal.h>
 
 #include <pktio/common.h>
@@ -1441,6 +1442,20 @@ static int dpdk_recv(pktio_entry_t *pktio_entry, int index,
 		else
 			nb_rx = mbuf_to_pkt(pktio_entry, pkt_table, rx_mbufs,
 					    nb_rx, ts);
+
+		/* Try IPsec inline processing */
+		for (i = 0; i < nb_rx; i++) {
+			odp_packet_t pkt = pkt_table[i];
+			odp_packet_hdr_t *pkt_hdr = odp_packet_hdr(pkt);
+
+			packet_parse_layer(pkt_hdr, ODP_PKTIO_PARSER_LAYER_L4);
+
+			if(odp_packet_has_ipsec(pkt_table[i]))
+				_odp_ipsec_try_inline(pkt_table[i]);
+
+			packet_parse_layer(pkt_hdr, ODP_PKTIO_PARSER_LAYER_L4);
+		}
+
 	}
 
 	return nb_rx;
