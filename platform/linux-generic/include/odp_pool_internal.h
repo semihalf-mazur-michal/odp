@@ -55,11 +55,9 @@ typedef struct pool_t {
 	odp_pool_param_t params;
 	odp_pool_t       pool_hdl;
 	odp_shm_t        shm;
-	odp_shm_t        uarea_shm;
 	uint32_t         num;
 	uint32_t         align;
 	uint32_t         shm_size;
-	uint32_t         uarea_shm_size;
 	odp_shm_t        ring_shm;
 	/* Used by DPDK zero-copy pktio */
 	pool_destroy_cb_fn ext_destroy;
@@ -67,7 +65,6 @@ typedef struct pool_t {
 
 	/* Below is for data plane */
 	uint8_t         *base_addr ODP_ALIGNED_CACHE;
-	uint8_t         *uarea_base_addr;
 	pool_ring_t     *ring;
 	uint32_t         headroom;
 	uint32_t         tailroom;

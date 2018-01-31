@@ -240,13 +240,15 @@ static void init_buffers(pool_t *pool)
 				continue;
 			}
 		}
-		if (pool->uarea_size)
-			uarea = &pool->uarea_base_addr[(i - skipped_blocks) *
-						       pool->uarea_size];
-		data = buf_hdr->data;
 
+		data = buf_hdr->data;
 		if (type == ODP_POOL_PACKET)
 			data = pkt_hdr->data;
+
+		if (pool->uarea_size) {
+			uarea = data;
+			data = (uint8_t *)((uintptr_t)data + pool->uarea_size);
+		}
 
 		offset = pool->headroom;
 
@@ -428,7 +430,7 @@ static odp_pool_t pool_create(const char *name, odp_pool_param_t *params,
 	hdr_size = ROUNDUP_CACHE_LINE(hdr_size);
 
 	block_size = ROUNDUP_CACHE_LINE(hdr_size + align + headroom + seg_len +
-					tailroom);
+					tailroom + uarea_size);
 
 	/* Allocate extra memory for skipping packet buffers which cross huge
 	 * page boundaries. */
@@ -449,7 +451,6 @@ static odp_pool_t pool_create(const char *name, odp_pool_param_t *params,
 	pool->block_size     = block_size;
 	pool->uarea_size     = uarea_size;
 	pool->shm_size       = (num + num_extra) * block_size;
-	pool->uarea_shm_size = num * uarea_size;
 	pool->ext_desc       = NULL;
 	pool->ext_destroy    = NULL;
 
@@ -467,20 +468,6 @@ static odp_pool_t pool_create(const char *name, odp_pool_param_t *params,
 
 	pool->base_addr = odp_shm_addr(pool->shm);
 
-	pool->uarea_shm = ODP_SHM_INVALID;
-	if (uarea_size) {
-		shm = odp_shm_reserve(uarea_name, pool->uarea_shm_size,
-				      ODP_PAGE_SIZE, shmflags);
-
-		pool->uarea_shm = shm;
-
-		if (shm == ODP_SHM_INVALID) {
-			ODP_ERR("Shm reserve failed (uarea)");
-			goto error;
-		}
-
-		pool->uarea_base_addr = odp_shm_addr(pool->uarea_shm);
-	}
 
 	ring_init(&pool->ring->hdr);
 	init_buffers(pool);
@@ -490,9 +477,6 @@ static odp_pool_t pool_create(const char *name, odp_pool_param_t *params,
 error:
 	if (pool->shm != ODP_SHM_INVALID)
 		odp_shm_free(pool->shm);
-
-	if (pool->uarea_shm != ODP_SHM_INVALID)
-		odp_shm_free(pool->uarea_shm);
 
 	LOCK(&pool->lock);
 	pool->reserved = 0;
@@ -601,9 +585,6 @@ static int generic_pool_destroy(odp_pool_t pool_hdl)
 
 	odp_shm_free(pool->shm);
 
-	if (pool->uarea_shm != ODP_SHM_INVALID)
-		odp_shm_free(pool->uarea_shm);
-
 	pool->reserved = 0;
 	odp_shm_free(pool->ring_shm);
 	pool->ring = NULL;
@@ -699,8 +680,6 @@ static void generic_pool_print(odp_pool_t pool_hdl)
 		"unknown")));
 	printf("  pool shm        %" PRIu64 "\n",
 	       odp_shm_to_u64(pool->shm));
-	printf("  user area shm   %" PRIu64 "\n",
-	       odp_shm_to_u64(pool->uarea_shm));
 	printf("  num             %u\n", pool->num);
 	printf("  align           %u\n", pool->align);
 	printf("  headroom        %u\n", pool->headroom);
@@ -711,8 +690,6 @@ static void generic_pool_print(odp_pool_t pool_hdl)
 	printf("  uarea size      %u\n", pool->uarea_size);
 	printf("  shm size        %u\n", pool->shm_size);
 	printf("  base addr       %p\n", pool->base_addr);
-	printf("  uarea shm size  %u\n", pool->uarea_shm_size);
-	printf("  uarea base addr %p\n", pool->uarea_base_addr);
 	printf("\n");
 }
 
