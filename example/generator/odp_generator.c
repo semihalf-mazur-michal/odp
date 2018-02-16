@@ -751,11 +751,11 @@ static void print_pkts(int thr, odp_packet_t pkt_tbl[], unsigned len)
 	for (i = 0; i < len; ++i) {
 		pkt = pkt_tbl[i];
 
+		odp_atomic_inc_u64(&counters.ip);
 		/* only ip pkts */
 		if (!odp_packet_has_ipv4(pkt))
 			continue;
 
-		odp_atomic_inc_u64(&counters.ip);
 		buf = odp_packet_data(pkt);
 		ip = (odph_ipv4hdr_t *)(buf + odp_packet_l3_offset(pkt));
 		offset = odp_packet_l4_offset(pkt);

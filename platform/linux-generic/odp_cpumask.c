@@ -304,7 +304,7 @@ static void init_default_control_cpumask(int worker_cpus_default)
 		for (i = 0; i < odp_global_data.num_cpus_installed; i++)
 			if (odp_cpumask_isset(worker_mask, i))
 				odp_cpumask_clr(control_mask, i);
-
+#if 1
 		/*
 		 * If only one or two CPUs installed,
 		 * ensure availability of CPU 0 for control threads
@@ -324,6 +324,7 @@ static void init_default_control_cpumask(int worker_cpus_default)
 			else
 				odp_cpumask_clr(control_mask, 0);
 		}
+#endif
 	}
 }
 
@@ -342,6 +343,7 @@ static void init_default_worker_cpumask(int control_cpus_default)
 	/* (Bits for all available CPUs are SET in worker cpumask) */
 
 	if (control_cpus_default) {
+#if 0
 		/*
 		 * The control cpumask was also unspecified...
 		 * CPU 0 is only used for workers on uniprocessor systems
@@ -356,6 +358,7 @@ static void init_default_worker_cpumask(int control_cpus_default)
 			 * reserve remaining CPUs for workers
 			 */
 			odp_cpumask_clr(worker_mask, 1);
+#endif
 	} else {
 		/*
 		 * The control cpumask was specified so first ensure
